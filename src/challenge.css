@@ -1,0 +1,275 @@
+/* ---------------------------------------------------------------------------
+ * challenge.css — style tambahan untuk fitur challenge
+ * (profile tabs, drafts/archive list, review actions, cart, share).
+ * Pakai variabel warna yang sudah ada: --ink --steel --line --brass --paper
+ * ------------------------------------------------------------------------- */
+
+/* ---------- Page loader (lazy load fallback) ---------- */
+.page-loader {
+  min-height: 40vh;
+}
+
+/* ---------- Profile tabs ---------- */
+.profile-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  margin: 20px 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+.profile-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--steel);
+  cursor: pointer;
+  white-space: nowrap;
+  margin-bottom: -1px;
+}
+.profile-tab:hover {
+  color: var(--ink);
+}
+.profile-tab--active {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--brass);
+}
+
+.profile-section {
+  padding: 8px 0 24px;
+}
+.profile-section h2.display {
+  font-size: 1.8rem;
+  margin: 0 0 12px;
+}
+.profile-bio {
+  margin: 6px 0 10px;
+  color: var(--ink);
+  line-height: 1.5;
+  max-width: 52ch;
+}
+.profile-bio--empty {
+  color: var(--steel);
+  font-style: italic;
+}
+
+/* ---------- Drafts & Archive list ---------- */
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.item-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #f7f9fa;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.item-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--steel);
+}
+.item-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.item-meta strong {
+  font-size: 1.05rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.item-time {
+  color: var(--steel);
+  font-size: 0.78rem;
+}
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+@media (max-width: 560px) {
+  .item-row {
+    flex-wrap: wrap;
+  }
+  .item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* ---------- Reviews: actions, votes, edit ---------- */
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.vote-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--steel);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.vote-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.vote-btn--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.vote-btn--active:hover {
+  color: #fff;
+}
+.vote-btn--down.vote-btn--active {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+.vote-btn--danger {
+  color: #c0392b;
+}
+.vote-btn--danger:hover {
+  border-color: #c0392b;
+  color: #c0392b;
+  background: #feeceb;
+}
+.review-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ---------- Detail actions wrap ---------- */
+.detail-actions {
+  flex-wrap: wrap;
+}
+
+/* ---------- Cart ---------- */
+.cart-list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.cart-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: #f7f9fa;
+  flex-shrink: 0;
+}
+.cart-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cart-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.cart-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cart-qty-num {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cart-line-total {
+  min-width: 80px;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cart-summary {
+  margin-top: 24px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--steel);
+}
+.cart-total {
+  color: var(--ink);
+  font-size: 1.4rem;
+}
+.cart-summary-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@media (max-width: 640px) {
+  .cart-item {
+    flex-wrap: wrap;
+  }
+  .cart-line-total {
+    margin-left: auto;
+  }
+}

@@ -1,21 +1,26 @@
-import { Plus } from 'lucide-react'
+import { Plus, ShoppingCart } from 'lucide-react'
 import { useFavorites } from '../hooks/useFavorites'
+import { useCart } from '../context/CartContext'
 
+// About & Contact sudah dipindah menjadi section di halaman Profile.
 const NAV_ITEMS = [
   { id: 'Catalog', label: 'Catalog' },
   { id: 'Favorites', label: 'Favorites', hasBadge: true },
   { id: 'Profile', label: 'Profile' },
-  { id: 'About', label: 'About' },
-  { id: 'Contact', label: 'Contact' },
 ]
 
 function Header({ tab, onTab, onNavigateCreate }) {
   const { favorites } = useFavorites()
+  const { totalQty } = useCart()
   const favCount = favorites ? favorites.length : 0
 
   return (
     <header className="header">
-      <div className="header-brand-wrap" onClick={() => onTab('Catalog')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div
+        className="header-brand-wrap"
+        onClick={() => onTab('Catalog')}
+        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+      >
         <div className="header-logo-badge">
           <img src="/logo.png" alt="Bore & Barrel" />
         </div>
@@ -31,11 +36,20 @@ function Header({ tab, onTab, onNavigateCreate }) {
             onClick={() => onTab(item.id)}
           >
             {item.label}
-            {item.hasBadge && favCount > 0 && (
-              <span className="nav-badge">{favCount}</span>
-            )}
+            {item.hasBadge && favCount > 0 && <span className="nav-badge">{favCount}</span>}
           </button>
         ))}
+
+        <button
+          type="button"
+          className={tab === 'Cart' ? 'nav-link active' : 'nav-link'}
+          onClick={() => onTab('Cart')}
+          aria-label={`Cart, ${totalQty} items`}
+        >
+          <ShoppingCart size={16} />
+          Cart
+          {totalQty > 0 && <span className="nav-badge">{totalQty}</span>}
+        </button>
       </nav>
 
       {onNavigateCreate && (

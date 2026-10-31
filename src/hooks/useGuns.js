@@ -1,90 +1,114 @@
 import { useState, useEffect, useCallback } from 'react'
 import gunService from '../services/gunService'
+import { fetchWithCache, peek } from '../utils/queryCache'
 
 // ---------------------------------------------------------------------------
-// useGuns — fetch the paginated / filtered product list from the API.
-//
+// useGuns — daftar produk, sekarang dengan QUERY CACHING.
+// Key cache = 'guns:' + params, jadi tiap kombinasi filter punya cache sendiri.
 // Returns { guns, loading, error, pagination, refetch }.
-// When the API is unreachable the `error` string will be set and `guns`
-// will remain an empty array so the UI can show a proper error state.
 // ---------------------------------------------------------------------------
-
 export function useGuns(params = {}) {
-  const [guns, setGuns] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [pagination, setPagination] = useState(null)
-
-  // Serialise params so the effect re-runs when they change.
   const paramKey = JSON.stringify(params)
+  const cacheKey = `guns:${paramKey}`
 
-  const fetchGuns = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
+  const cached = peek(cacheKey)
+  const [guns, setGuns] = useState(cached?.data || [])
+  const [loading, setLoading] = useState(!cached)
+  const [error, setError] = useState(null)
+  const [pagination, setPagination] = useState(cached?.pagination || null)
 
-      const response = await gunService.getGuns(params)
+  const fetchGuns = useCallback(
+    async (force = false) => {
+      const hit = peek(cacheKey)
+      if (hit) {
+        // Tampilkan data cache dulu (stale-while-revalidate)
+        setGuns(hit.data || [])
+        setPagination(hit.pagination || null)
+        setLoading(false)
+      } else {
+        setLoading(true)
+      }
 
-      if (response.success) {
+      try {
+        setError(null)
+        const response = await fetchWithCache(
+          cacheKey,
+          async () => {
+            const r = await gunService.getGuns(params)
+            if (!r.success) throw new Error(r.message || 'Failed to fetch products.')
+            return r
+          },
+          { force },
+        )
         setGuns(response.data || [])
         setPagination(response.pagination || null)
-      } else {
-        setError(response.message || 'Failed to fetch products.')
+      } catch (err) {
+        setError(err.message || 'An error occurred while fetching products.')
+        if (!hit) setGuns([])
+      } finally {
+        setLoading(false)
       }
-    } catch (err) {
-      setError(err.message || 'An error occurred while fetching products.')
-      setGuns([])
-    } finally {
-      setLoading(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paramKey])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [cacheKey],
+  )
 
   useEffect(() => {
     fetchGuns()
   }, [fetchGuns])
 
-  return { guns, loading, error, pagination, refetch: fetchGuns }
+  return { guns, loading, error, pagination, refetch: () => fetchGuns(true) }
 }
 
 // ---------------------------------------------------------------------------
-// useGunById — fetch a single product by its UUID.
-//
-// Returns { gun, loading, error, refetch }.
+// useGunById — satu produk by id, juga ter-cache ('gun:<id>').
 // ---------------------------------------------------------------------------
-
 export function useGunById(id) {
-  const [gun, setGun] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const cacheKey = `gun:${id}`
+  const cached = id ? peek(cacheKey) : null
+  const [gun, setGun] = useState(cached || null)
+  const [loading, setLoading] = useState(Boolean(id) && !cached)
   const [error, setError] = useState(null)
 
-  const fetchGun = useCallback(async () => {
-    if (!id) {
-      setLoading(false)
-      return
-    }
-    try {
-      setLoading(true)
-      setError(null)
-
-      const response = await gunService.getGunById(id)
-
-      if (response.success) {
-        setGun(response.data)
-      } else {
-        setError(response.message || 'Product not found.')
+  const fetchGun = useCallback(
+    async (force = false) => {
+      if (!id) {
+        setLoading(false)
+        return
       }
-    } catch (err) {
-      setError(err.message || 'Failed to load product details.')
-      setGun(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [id])
+      const hit = peek(cacheKey)
+      if (hit) {
+        setGun(hit)
+        setLoading(false)
+      } else {
+        setLoading(true)
+      }
+
+      try {
+        setError(null)
+        const data = await fetchWithCache(
+          cacheKey,
+          async () => {
+            const r = await gunService.getGunById(id)
+            if (!r.success) throw new Error(r.message || 'Product not found.')
+            return r.data
+          },
+          { force },
+        )
+        setGun(data)
+      } catch (err) {
+        setError(err.message || 'Failed to load product details.')
+        if (!hit) setGun(null)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [id, cacheKey],
+  )
 
   useEffect(() => {
     fetchGun()
   }, [fetchGun])
 
-  return { gun, loading, error, refetch: fetchGun }
+  return { gun, loading, error, refetch: () => fetchGun(true) }
 }
